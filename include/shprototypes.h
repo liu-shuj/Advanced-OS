@@ -23,7 +23,8 @@ extern	shellcmd  xsh_devdump	(int32, char *[]);
 extern	shellcmd  xsh_echo	(int32, char *[]);
 /* in file xsh_hello.c */
 extern  shellcmd  xsh_hello      (int32, char *[]);
-
+/* in file xsh_hello.c */
+extern  shellcmd  xsh_prodcons   (int32, char *[]);
 /* in file xsh_ethstat.c */
 extern	shellcmd  xsh_ethstat	(int32, char *[]);
 
