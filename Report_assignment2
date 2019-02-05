@@ -1,0 +1,4 @@
+•	Does your program output any garbage? If yes, why?
+No. When the consumer prints, the “produced” semaphore has already decreased to 0, and it becomes 1 again only after the producer increases the value of n, which prevented the consumer to print the same value twice. 
+•	Are all the produced values getting consumed? Check your program for a small count like 20.
+Yes. Before the producer increases the value of n, it waits for the “consumed” semaphore, which is set to 1 only when the consumer has already printed the current value of n, preventing the producer from increasing twice at a time.
