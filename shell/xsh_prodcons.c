@@ -1,10 +1,15 @@
 #include <xinu.h>
 #include <prodcons.h>
+int n=0;
+sid32 produced,consumed;
 
-int n=0;                 //Definition for global variable 'n'
-/*Now global variable n will be on Heap so it is accessible all the processes i.e. consume and produce*/
-sid32 produced, consumed;
 shellcmd xsh_prodcons(int nargs, char *args[])
+{
+  prodcons(nargs,args);
+  return (0);
+}
+
+int prodcons(int nargs, char* args[])
 {
   if (nargs == 2 && strncmp(args[1], "--help", 7) == 0) {
     printf("Usage: %s\n\n", args[0]);

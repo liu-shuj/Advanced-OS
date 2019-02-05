@@ -1,4 +1,3 @@
-/* xsh_echo.c - xsh_echo */
 
 #include <xinu.h>
 #include <stdio.h>

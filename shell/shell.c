@@ -19,6 +19,7 @@ const	struct	cmdent	cmdtab[] = {
 	{"kill",	TRUE,	xsh_kill},
 	{"memdump",	FALSE,	xsh_memdump},
 	{"hello",     FALSE,  xsh_hello},
+	{"run",     FALSE,  xsh_run},
 	{"prodcons",    FALSE,  xsh_prodcons},
 	{"memstat",	FALSE,	xsh_memstat},
 	{"ps",		FALSE,	xsh_ps},
