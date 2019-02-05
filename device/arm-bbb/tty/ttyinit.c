@@ -2,6 +2,8 @@
 
 #include <xinu.h>
 
+int32 uartinit(struct	uart_csreg *uptr);
+
 struct	ttycblk	ttytab[Ntty];
 
 /*------------------------------------------------------------------------
@@ -35,6 +37,7 @@ devcall	ttyinit(
 	typtr->tyicrlf = TRUE;			/* Map CR to NEWLINE	*/
 	typtr->tyierase = TRUE;			/* Do erasing backspace	*/
 	typtr->tyierasec = TY_BACKSP;		/* Erase char is ^H	*/
+  typtr->tyierasec2 = TY_BACKSP2;		/* Alt erase char is bkspc	*/
 	typtr->tyeof = TRUE;			/* Honor eof on input	*/
 	typtr->tyeofch = TY_EOFCH;		/* End-of-file character*/
 	typtr->tyikill = TRUE;			/* Allow line kill	*/
@@ -46,22 +49,25 @@ devcall	ttyinit(
 	typtr->tyostart = TY_STRTCH;		/* Start char is ^Q	*/
 	typtr->tyocrlf = TRUE;			/* Send CRLF for NEWLINE*/
 	typtr->tyifullc = TY_FULLCH;		/* Send ^G when buffer	*/
-						/*   is full		*/
+                                  /*   is full		*/
 
+  typtr->cout = 0;
+  typtr->cin = 0;
+  typtr->lserr = 0;
+  typtr->ovrrn = 0;
+  typtr->iirq = 0;
+  typtr->oirq = 0;
+  
 	/* Initialize the UART */
 
 	uptr = (struct uart_csreg *)devptr->dvcsr;
 
-	/* Set baud rate */
-	uptr->lcr = UART_LCR_DLAB;
-	uptr->dlm = UART_DLM;
-	uptr->dll = UART_DLL;
+  if ((uartinit(uptr)) == SYSERR) {
+    printf("uartinit failed\n");
+    return (SYSERR);
+  }
 
-	uptr->lcr = UART_LCR_8N1;	/* 8 bit char, No Parity, 1 Stop*/
-	uptr->fcr = 0x00;		/* Disable FIFO for now		*/
-
-	/* Register the interrupt dispatcher for the tty device */
-
+    	/* Register the interrupt dispatcher for the tty device */
 #ifdef ARM_BBB
 	set_evec( devptr->dvirq, (uint32)devptr->dvintr );
 #endif /* ARM_BBB */
@@ -69,18 +75,7 @@ devcall	ttyinit(
 	interruptVector[devptr->dvirq] = devptr->dvintr;
 #endif /* ARM_QEMU */
 
-	/* Enable interrupts on the device: reset the transmit and	*/
-	/*   receive FIFOS, and set the interrupt trigger level		*/
-
-	uptr->fcr = UART_FCR_EFIFO | UART_FCR_RRESET |
-			UART_FCR_TRESET | UART_FCR_TRIG2;
-
-	/* UART must be in 16x mode (TI AM335X specific) */
-
-	uptr->mdr1 = UART_MDR1_16X;
-
-	/* Start the device */
-
+  /* Start the device */
 	ttykickout(uptr);
 	return OK;
 }

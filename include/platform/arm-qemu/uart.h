@@ -1,17 +1,16 @@
-/**
- * @file pl011.h
- */
-
-/* Embedded Xinu, Copyright (C) 2009, 2013.  All rights reserved. */
-
-#ifndef _PL011_H_
-#define _PL011_H_
+/* uart.h - definintions for the uart serial hardware */
+#ifndef _UART_H
+#define _UART_H
+#include <stddef.h>
+#define UART_BAUD	115200	/* Default console baud rate.		*/
+#define UART_FIFO_SIZE  1
+#define NUART 1
 
 /**
  * Control and status registers for the PL011 UART.  This structure is
  * mapped directly to the base address for the CSR.
  */
-struct pl011_uart_csreg
+struct uart_csreg
 {
     volatile unsigned int dr;          /**< Data Register                        */ //0x00
     volatile unsigned int rsrecr;      /**< Receive status/error clear register  */ //0x04
@@ -146,4 +145,4 @@ struct pl011_uart_csreg
 #define PL011_BAUD_INT(x) (3000000 / (16 * (x)))
 #define PL011_BAUD_FRAC(x) (int)((((3000000.0 / (16.0 * (x)))-PL011_BAUD_INT(x))*64.0)+0.5) //9600 baud may be slightly off with this calcualtion
 
-#endif                          /* _PL011_H_ */
+#endif 
