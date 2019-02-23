@@ -14,30 +14,32 @@ int init_stream(struct Stream* s,int maxsize)
 	return status;
 }
 
-void read_input(struct Data* data)
+int read_input(struct Data* data)
 {
 	static int i=0;
-	if(i>10) return;
-	char* a = (char *)stream_input[i];
+	if(i>10) return 0;
+	char* a = (char *)stream_input[i++];
 	data->stream_id = atoi(a);
 	while (*a++ != '\t');
 	data->timestamp = atoi(a);
 	while (*a++ != '\t');
 	data->value = atoi(a);
+	return 1;
 }
 
 void s_producer(struct Stream** stream_table)
 {	
 	while(1){
 		struct Data* data=(struct Data*)getmem(sizeof(struct Data));
-		read_input(data);
-		
-		int s_index=data->stream_id;
-		struct Stream* s=stream_table[s_index];
-		wait(s->mutex);
-		if(push_queue(s->q,data)!=-1)
-		signal(s->mutex);
-		printf("producer out of CS\n");
+		if(read_input(data)){
+			int s_index=data->stream_id;
+			struct Stream* s=stream_table[s_index];
+			wait(s->mutex);
+			push_queue(s->q,data);
+			signal(s->mutex);
+			printf("producer out of CS\n");
+			int i;
+		}
 	}
 }
 
@@ -45,29 +47,34 @@ int s_consumer(struct Stream* s,int time_window,int output_time)
 {
 	struct tscdf* tc=tscdf_init(time_window);
 	int counter=0;
+	int poped=0;
 	while(1){
+		poped=0;
 		struct Data* data=NULL;
 		wait(s->mutex);
-		pop_queue(s->q,&data);
+		if(pop_queue(s->q,&data)!=-1)
+			poped=1;
 		signal(s->mutex);
-		printf("consumer out of CS\n");
-		tscdf_update(tc,data->timestamp,data->value);
-		counter++;
-		freemem(data,sizeof(struct Data));
-		if(counter==output_time)
-		{
-			int32* qarray = tscdf_quartiles(tc);
+		if(poped){
+			printf("consumer out of CS\n");
+			tscdf_update(tc,data->timestamp,data->value);
+			counter++;
+			freemem(data,sizeof(struct Data));
+			if(counter==output_time)
+			{
+				int32* qarray = tscdf_quartiles(tc);
 
-			if(qarray == NULL) {
-				kprintf("tscdf_quartiles returned NULL\n");
-			}
-			int i;
-			for(i=0; i < 5; i++) {
-			   kprintf("%d ", qarray[i]);
-			}
-			kprintf("\n");
+				if(qarray == NULL) {
+					kprintf("tscdf_quartiles returned NULL\n");
+				}
+				int i;
+				for(i=0; i < 5; i++) {
+				   kprintf("%d ", qarray[i]);
+				}
+				kprintf("\n");
 				  
-			freemem((char *)qarray, (6*sizeof(int32)));
+				freemem((char *)qarray, (6*sizeof(int32)));
+			}
 		}
 	}
 }
@@ -83,7 +90,7 @@ int stream_proc(int nargs, char* args[])
 	int i;
 	char* ch;
 	char c;
-	if (!(nargs % 2)) {
+	if (nargs==0||!(nargs % 2)) {
 	  printf("%s", usage);
 	  return(-1);
 	}
