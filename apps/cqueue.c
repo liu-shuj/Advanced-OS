@@ -24,6 +24,7 @@ int push_queue(struct Queue* q,void* element)
 	q->tail=(q->tail+1)%q->size;
 	if(q->tail==q->head)
 		q->full=1;
+	return 0;
 }
 
 int pop_queue(struct Queue* q,void** element)
@@ -35,4 +36,5 @@ int pop_queue(struct Queue* q,void** element)
 	q->full=0;
 	if(q->head==q->tail)
 		q->empty=1;
+	return 0;
 }

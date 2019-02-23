@@ -18,7 +18,7 @@ void read_input(struct Data* data)
 {
 	static int i=0;
 	if(i>10) return;
-	a = (char *)stream_input[i];
+	char* a = (char *)stream_input[i];
 	data->stream_id = atoi(a);
 	while (*a++ != '\t');
 	data->timestamp = atoi(a);
@@ -26,41 +26,42 @@ void read_input(struct Data* data)
 	data->value = atoi(a);
 }
 
-void producer(struct Stream** stream_table)
+void s_producer(struct Stream** stream_table)
 {	
 	while(1){
 		struct Data* data=(struct Data*)getmem(sizeof(struct Data));
 		read_input(data);
 		
-		s_index=data->stream_id;
+		int s_index=data->stream_id;
 		struct Stream* s=stream_table[s_index];
-		
 		wait(s->mutex);
-		while(push_queue(s->q,data)==-1);
+		if(push_queue(s->q,data)!=-1)
 		signal(s->mutex);
+		printf("producer out of CS\n");
 	}
 }
 
-int consumer(struct Stream** s,int time_window,int output_time)
+int s_consumer(struct Stream* s,int time_window,int output_time)
 {
-	struct tscdf* mytscdf=tscdf_init(time_window);
+	struct tscdf* tc=tscdf_init(time_window);
 	int counter=0;
 	while(1){
-		wait(s->mutex);
 		struct Data* data=NULL;
-		while(pop_queue(s->q,&data)==-1);
+		wait(s->mutex);
+		pop_queue(s->q,&data);
 		signal(s->mutex);
-		tscdf_update(mytscdf,data->timestamp,data->value);
+		printf("consumer out of CS\n");
+		tscdf_update(tc,data->timestamp,data->value);
 		counter++;
 		freemem(data,sizeof(struct Data));
 		if(counter==output_time)
 		{
-			qarray = tscdf_quartiles(tc);
+			int32* qarray = tscdf_quartiles(tc);
 
 			if(qarray == NULL) {
 				kprintf("tscdf_quartiles returned NULL\n");
 			}
-
+			int i;
 			for(i=0; i < 5; i++) {
 			   kprintf("%d ", qarray[i]);
 			}
@@ -78,7 +79,10 @@ int stream_proc(int nargs, char* args[])
 	int work_queue,time_window,output_time;
 	char usage[] = "Usage: -s num_streams -w work_queue -t time_window -o output_time\n";
 	
-	# parse args
+	// parse args
+	int i;
+	char* ch;
+	char c;
 	if (!(nargs % 2)) {
 	  printf("%s", usage);
 	  return(-1);
@@ -115,8 +119,8 @@ int stream_proc(int nargs, char* args[])
 	  }
 	}
 	
-	struct Stream* stream_table[num_streams]={NULL};
-	for(int i=0;i<num_streams;i++)
+	struct Stream* stream_table[num_streams];
+	for(i=0;i<num_streams;i++)
 	{
 		stream_table[i]=(struct Stream*)getmem(sizeof(struct Stream));
 		if(init_stream(&(stream_table[i]),2*time_window)==-1){
@@ -124,9 +128,10 @@ int stream_proc(int nargs, char* args[])
 			return -1;
 		}
 	}
-	resume(create(producer, 1024, 20, "producer", 1, stream_table));
-	for(int stream_id=0;stream_id<num_streams;stream_id++)
-		resume(create(consumer, 1024, 20, "consumer", 3, stream_table[i],time_window,output_time));
+	resume(create(s_producer, 1024, 20, "s_producer", 1, stream_table));
+	int stream_id;
+	for(stream_id=0;stream_id<num_streams;stream_id++)
+		resume(create(s_consumer, 1024, 20, "s_consumer", 3, stream_table[i],time_window,output_time));
 	return 0;
 }
 	
