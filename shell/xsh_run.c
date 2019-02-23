@@ -1,8 +1,9 @@
-
 #include <xinu.h>
 #include <stdio.h>
 #include <prodcons.h>
+#include <stream_proc.h>
 extern int prodcons(int nargs, char* args[]);
+extern int stream_proc(int nargs, char* args[]);
 /*------------------------------------------------------------------------
  *  * xsh-run
  *   *------------------------------------------------------------------------
@@ -32,7 +33,10 @@ shellcmd xsh_run(int nargs, char *args[])
     	if(strncmp(args[0], "prodcons", 9) == 0) {
 		/* create a process with the function as an entry point. */
 		resume (create((void *)prodcons, 4096, 20, "prodcons", 2, nargs, args));
-   	 }
+  	}
+	else if(strncmp(args[0],"stream_proc",12)==0){
+		resume (create((void *)stream_proc, 4096, 20, "stream_proc", 2, nargs, args));
+	}
 	else{
 		printf("Not supported command!\n");
 		return 1;
