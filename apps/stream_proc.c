@@ -38,6 +38,9 @@ void s_producer(struct Stream** stream_table)
 			push_queue(s->q,data);
 			signal(s->mutex);
 		}
+		else{
+			freemem(data,sizeof(struct Data));
+		}
 	}
 }
 
