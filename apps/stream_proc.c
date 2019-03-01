@@ -8,7 +8,7 @@ int init_stream(struct Stream* s,int maxsize)
 {
 	int status=0;
 	s->q=(struct Queue*)getmem(sizeof(struct Queue));
-	if(status==init_queue(&s->q,maxsize)!=0)
+	if(status==init_queue(&(s->q),maxsize)!=0)
 		return status;
 	status=(s->mutex=semcreate(1));
 	return status;
@@ -37,8 +37,6 @@ void s_producer(struct Stream** stream_table)
 			wait(s->mutex);
 			push_queue(s->q,data);
 			signal(s->mutex);
-			printf("producer out of CS\n");
-			int i;
 		}
 	}
 }
@@ -49,14 +47,13 @@ int s_consumer(struct Stream* s,int time_window,int output_time)
 	int counter=0;
 	int poped=0;
 	while(1){
-		poped=0;
 		struct Data* data=NULL;
 		wait(s->mutex);
-		if(pop_queue(s->q,&data)!=-1)
-			poped=1;
+		pop_queue(s->q,&data);
 		signal(s->mutex);
-		if(poped){
-			printf("consumer out of CS\n");
+		if(data){
+			//printf("%d %d\n",data->timestamp,data->value);
+			//printf("%d %d %d %d %d\n",s->q->head,s->q->tail,s->q->full,s->q->empty,s->q->size);
 			tscdf_update(tc,data->timestamp,data->value);
 			counter++;
 			freemem(data,sizeof(struct Data));
@@ -125,20 +122,24 @@ int stream_proc(int nargs, char* args[])
 		i -= 2;
 	  }
 	}
-	
-	struct Stream* stream_table[num_streams];
+	//struct Stream* stream_table[num_streams];
+	struct Stream** stream_table=(struct Stream**)getmem(num_streams*sizeof(struct Stream*));
 	for(i=0;i<num_streams;i++)
 	{
 		stream_table[i]=(struct Stream*)getmem(sizeof(struct Stream));
-		if(init_stream(&(stream_table[i]),2*time_window)==-1){
+		if(init_stream(stream_table[i],20)==-1){
 			printf("Error creating stream!");
 			return -1;
 		}
 	}
 	resume(create(s_producer, 1024, 20, "s_producer", 1, stream_table));
 	int stream_id;
-	for(stream_id=0;stream_id<num_streams;stream_id++)
-		resume(create(s_consumer, 1024, 20, "s_consumer", 3, stream_table[i],time_window,output_time));
+	char** names=(char**)getmem(num_streams*sizeof(char*));
+	for(stream_id=0;stream_id<num_streams;stream_id++){
+		names[stream_id]=(char*)getmem(20*sizeof(char));
+		sprintf(names[stream_id],"consumer_%d",stream_id);
+		resume(create(s_consumer, 1024, 20, names[stream_id], 3, stream_table[stream_id],time_window,output_time));
+	}
 	return 0;
 }
 	
