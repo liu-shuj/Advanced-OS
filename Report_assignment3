@@ -1,0 +1,4 @@
+- What can you do about mixed output during debugging?
+A:Print out which pid, which of producer/consumer, which function does it come from.
+- Where do you need mutexes?
+A:A mutex is needed in each stream protecting reading and writing of the queue.

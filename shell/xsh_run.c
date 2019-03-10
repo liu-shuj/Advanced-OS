@@ -4,6 +4,7 @@
 #include <stream_proc.h>
 extern int prodcons(int nargs, char* args[]);
 extern int stream_proc(int nargs, char* args[]);
+extern uint32 future_test(int nargs, char *args[]);
 /*------------------------------------------------------------------------
  *  * xsh-run
  *   *------------------------------------------------------------------------
@@ -36,6 +37,9 @@ shellcmd xsh_run(int nargs, char *args[])
   	}
 	else if(strncmp(args[0],"stream_proc",12)==0){
 		resume (create((void *)stream_proc, 4096, 20, "stream_proc", 2, nargs, args));
+	}
+	else if(strncmp(args[0],"future_test",12)==0){
+		resume (create((void *)future_test, 4096, 20, "future_test", 2, nargs, args));
 	}
 	else{
 		printf("Not supported command!\n");

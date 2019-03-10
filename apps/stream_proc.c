@@ -50,6 +50,7 @@ int s_consumer(struct Stream* s,int time_window,int output_time)
 	int counter=0;
 	int poped=0;
 	while(1){
+		sleep(1);
 		struct Data* data=NULL;
 		wait(s->mutex);
 		pop_queue(s->q,&data);
@@ -62,6 +63,7 @@ int s_consumer(struct Stream* s,int time_window,int output_time)
 			freemem(data,sizeof(struct Data));
 			if(counter==output_time)
 			{
+				counter=0;
 				int32* qarray = tscdf_quartiles(tc);
 
 				if(qarray == NULL) {
