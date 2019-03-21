@@ -15,7 +15,9 @@ syscall future_set(future* f, char* value)
 	else if(f->state==FUTURE_EMPTY || f->state==FUTURE_WAITING){
 		memcpy(f->value,value,f->size);
 		f->state=FUTURE_FULL;
-		ready(f->pid); //TOFIX: no pid waiting?
+		//ready(f->pid); //TOFIX: no pid waiting?
+		if(f->pid)
+			ready(f->pid);
 	}
 	restore(mask);
 	return OK;
