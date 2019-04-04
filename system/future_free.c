@@ -5,12 +5,9 @@ syscall future_free(future* f)
 	intmask mask;
 	mask=disable();
 	f->state=FUTURE_FREE;
-	if(freemem(f->value,f->size)==SYSERR){
-		restore(mask);
-		return SYSERR;
-	}
-	else{
-		restore(mask);
-		return OK;
-	}
+	free_queue(f->set_queue);
+	free_queue(f->get_queue);
+	freemem(f->value,f->size);
+	restore(mask);
+	return OK;
 }
