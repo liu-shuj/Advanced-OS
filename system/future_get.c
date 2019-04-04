@@ -44,6 +44,8 @@ syscall future_get(future* f, char* value)
 		if(f->flags==FUTURE_EXCLUSIVE || f->flags==FUTURE_QUEUE){
 			f->state=FUTURE_EMPTY;
 			if(f->flags==FUTURE_QUEUE){
+				if(!(f->get_queue.empty))
+					f->state=FUTURE_WAITING;
 				if(!(f->set_queue.empty)){
 					pop_queue(&f->set_queue,&wakepid);
 					ready((pid32)wakepid);
