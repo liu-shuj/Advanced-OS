@@ -8,7 +8,7 @@ int init_stream(struct Stream* s,int maxsize)
 {
 	int status=0;
 	s->q=(struct Queue*)getmem(sizeof(struct Queue));
-	if(status==init_queue(&(s->q),maxsize)!=0)
+	if(status==init_queue((s->q),maxsize)!=0)
 		return status;
 	status=(s->mutex=semcreate(1));
 	return status;

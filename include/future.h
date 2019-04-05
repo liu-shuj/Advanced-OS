@@ -8,7 +8,11 @@
 #define FUTURE_WAITING  5
 
 /* modes of operation for future*/
-#define FUTURE_EXCLUSIVE  0	
+#define FUTURE_EXCLUSIVE  1
+#define FUTURE_SHARED 2
+#define FUTURE_QUEUE 3	
+
+#include <cqueue.h>
 
 typedef struct futent
 {
@@ -17,6 +21,8 @@ typedef struct futent
   uint32 size;
   char *value; /* alloc must memget size (in chars) space */
   pid32 pid; /* for single waiter case */
+  struct Queue set_queue;
+  struct Queue get_queue;
 } future;
 
 /* Interface for system call */

@@ -1,20 +1,24 @@
 #include<cqueue.h>
 
-int init_queue(struct Queue** q,int maxsize){
+int init_queue(struct Queue* q,int maxsize){
 	if(maxsize<=0)
 		return -1;
-	(*q)->arr=(void**)getmem(maxsize*sizeof(void*));
-	(*q)->size=maxsize;
-	(*q)->head=0;
-	(*q)->tail=0;
-	(*q)->full=0;
-	(*q)->empty=1;
+	q->arr=(void**)getmem(maxsize*sizeof(void*));
+	q->size=maxsize;
+	q->head=0;
+	q->tail=0;
+	q->full=0;
+	q->empty=1;
+	return 0;
+}
+
+int free_queue(struct Queue* q){
+	freemem(q->arr,q->size*sizeof(void*));
 	return 0;
 }
 
 int push_queue(struct Queue* q,void* element)
 {
-	//printf("%d %d %d %d %d\n",q->head,q->tail,q->full,q->empty,q->size);
 	if(q->full)
 		return -1;
 	q->arr[q->tail]=element;
@@ -27,7 +31,6 @@ int push_queue(struct Queue* q,void* element)
 
 int pop_queue(struct Queue* q,void** element)
 {
-	//printf("%d %d %d %d %d\n",q->head,q->tail,q->full,q->empty,q->size);
 	if(q->empty)
 		return -1;
 	*element=q->arr[q->head];
