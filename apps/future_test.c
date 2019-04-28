@@ -130,7 +130,7 @@ uint32 future_test(int nargs, char *args[])
       return(SYSERR);
     }
     for(i=0;i<=fib;i++){
-      if((fibfut[i]=future_alloc(future_flags,sizeof(int)))==(future*)SYSERR){
+      if((fibfut[i]=future_alloc(FUTURE_SHARED,sizeof(int)))==(future*)SYSERR){
         printf("future_alloc failed\n");
         return(SYSERR);
       }

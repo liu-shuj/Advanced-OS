@@ -1,4 +1,5 @@
 /* xinu.h - include all system header files */
+#define FS
 #ifndef _XINU_H
 #define _XINU_H
 #include <stdarg.h>

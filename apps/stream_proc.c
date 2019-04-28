@@ -2,6 +2,7 @@
 #include<tscdf.h>
 #include<cqueue.h>
 #include<tscdf-input1.h>
+#include<a3input.h>
 #include<future.h>
 
 int init_stream(struct Stream* s,int maxsize)
@@ -162,7 +163,7 @@ int stream_proc(int usefuture, int nargs, char* args[])
 		for(i=0;i<num_streams;i++)
 		{
 			stream_table[i]=(struct Stream*)getmem(sizeof(struct Stream));
-			if(init_stream(stream_table[i],20)==-1){
+			if(init_stream(stream_table[i],2000)==-1){
 				printf("Error creating stream!");
 				return -1;
 			}
