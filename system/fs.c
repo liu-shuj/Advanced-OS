@@ -219,7 +219,7 @@ int fs_open(char *filename, int flags) {
 	int i;
 	for(i = 0; i < fsd.root_dir.numentries; i++)
 		if(strcmp(filename, fsd.root_dir.entry[i].name) == 0){
-			fs_get_inode_by_num(dev0, i, &node);
+			fs_get_inode_by_num(dev0, fsd.root_dir.entry[i].inode_num, &node);
 			oft[i].state = FSTATE_OPEN;
 			oft[i].fileptr = 0;
 			oft[i].de = &fsd.root_dir.entry[i];
