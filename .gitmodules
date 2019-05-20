@@ -1,3 +1,4 @@
 [submodule "apps/tscdf"]
 	path = apps/tscdf
 	url = git@github.iu.edu:swany/tscdf
+	ignore = dirty
