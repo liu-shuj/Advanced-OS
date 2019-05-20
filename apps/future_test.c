@@ -57,7 +57,7 @@ uint future_cons(future* fut) {
 uint32 future_test(int nargs, char *args[])
 {
   int ring = 0;
-  int future_flags = 0;
+  int future_flags = FUTURE_EXCLUSIVE;
   int ring_count = 10;
   int final_val;
   int i;
@@ -68,8 +68,9 @@ uint32 future_test(int nargs, char *args[])
   return OK;
 #endif
 
-  if (nargs == 2 && strncmp(args[1], "-r", 2) == 0) {
+  if (nargs == 3 && strncmp(args[1], "-r", 2) == 0) {
     ring = 1;
+    ring_count=atoi(args[2]);
     printf("Producer/consumer process ring\n");
   }
   else if(nargs==3 && strncmp(args[1],"-f",2)==0){
@@ -129,7 +130,7 @@ uint32 future_test(int nargs, char *args[])
       return(SYSERR);
     }
     for(i=0;i<=fib;i++){
-      if((fibfut[i]=future_alloc(future_flags,sizeof(int)))==(future*)SYSERR){
+      if((fibfut[i]=future_alloc(FUTURE_SHARED,sizeof(int)))==(future*)SYSERR){
         printf("future_alloc failed\n");
         return(SYSERR);
       }
